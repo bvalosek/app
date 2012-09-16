@@ -9,13 +9,13 @@
         <!-- kickass -->
         <meta name="apple-mobile-web-app-capable" content="yes">
 
-        <!-- js -->
+        <!-- js app files -->
         <? if(isset($files['js'])):
                 foreach ($files['js'] as $file):
                     ?><script src="/app/js/<?= $file ?>" type="text/javascript"></script>
         <? endforeach; endif;?>
 
-        <!-- css -->
+        <!-- css app files -->
         <? if(isset($files['css'])):
                 foreach ($files['css'] as $file):
                     ?><link href="/app/css/<?= $file ?>" rel="stylesheet" type="text/css" />

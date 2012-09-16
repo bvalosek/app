@@ -47,8 +47,9 @@ class Controller_App extends Controller {
         // loop over all include paths to check for app files
         foreach (Kohana::include_paths() as $path) {
             foreach (Controller_App::find_all_files(
-                $path.'app') as $ext => $file) {
-                    $ret[$ext] = $file;
+                $path.'app') as $ext => $files) {
+                    foreach ($files as $file)
+                        $ret[$ext][] = $file;
             }
         }
 
