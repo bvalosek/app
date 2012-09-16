@@ -6,6 +6,7 @@
  */
 
 return array (
-    'release_number' => 'local',
-    'build_number' => 'dev',
+    'name'              => 'App Name',
+    'release_number'    => '0.0.0',
+    'build_number'      => 'X',
 );
