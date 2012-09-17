@@ -12,13 +12,13 @@
         <!-- js app files -->
         <? if(isset($files['js'])):
                 foreach ($files['js'] as $file):
-                    ?><script src="/app/js/<?= $file ?>" type="text/javascript"></script>
+                    ?><script src="<?= $file ?>" type="text/javascript"></script>
         <? endforeach; endif;?>
 
         <!-- css app files -->
         <? if(isset($files['css'])):
                 foreach ($files['css'] as $file):
-                    ?><link href="/app/css/<?= $file ?>" rel="stylesheet" type="text/css" />
+                    ?><link href="<?= $file ?>" rel="stylesheet" type="text/css" />
         <? endforeach; endif;?>
 
     </head>

@@ -12,7 +12,7 @@ class Controller_App_Template extends Controller_Template {
     /** sprinkle in a bit of info */
     public function before() {
         parent::before();
-        $this->template->files  = Controller_App::get_app_files();
+        $this->template->files  = App::get_app_files();
         $this->template->app_info = Kohana::$config->load('version');
     }
 }
