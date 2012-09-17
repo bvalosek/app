@@ -104,6 +104,7 @@ class App {
         if (!$root)
             return array();
 
+        $result = array();
         foreach($root as $value)
         {
             $file = "$dir/$value";
@@ -124,7 +125,8 @@ class App {
             // otherwise recurse
             foreach(App::find_all_files(
                 $file, "$value/") as $ext => $value)
-                    $result[$ext] = $value;
+                    foreach ($value as $file)
+                        $result[$ext][] = $file;
 
         }
         return $result;
