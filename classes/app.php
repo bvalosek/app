@@ -5,8 +5,13 @@
 
 class App {
 
+    /** information about packages */
+    public static function get_packages() {
+        return App::get_app_files(true);
+    }
+
     /** get big list of app files */
-    public static function get_app_files() {
+    public static function get_app_files($ret_sources = false) {
         // loop over all include paths to check for app files
         foreach (Kohana::include_paths() as $path) {
             foreach (App::find_all_files(
@@ -17,6 +22,7 @@ class App {
         }
 
         // build out the file list for JS
+        $all_sources = array();
         foreach ($ret as $ext => $files) {
             $sources = array();
             foreach ($files as $file) {
@@ -29,8 +35,12 @@ class App {
                     'file' => '/app/'.$info->extension.'/'.$file,
                     'requires' => $info->requires,
                     'added' => false,
+                    'extension' => $ext,
+                    'kohana_file' => substr($file, 0, -(strlen($ext) + 1)),
                 );
             }
+
+            $all_sources[$ext] = $sources;
 
             // output
             $output = array();
@@ -39,6 +49,9 @@ class App {
 
             $ret[$ext] = $output;
         }
+
+        if ($ret_sources)
+            return $all_sources;
 
         return $ret;
     }

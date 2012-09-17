@@ -15,6 +15,39 @@ class Controller_App extends Controller {
         $this->auto_render = FALSE;
     }
 
+    /** output package information as JSON */
+    public function action_packages() {
+        $this->response->headers('content-type', 'text/javascript');
+        echo json_encode(App::get_packages());
+    }
+
+    /** serve some templated HTML */
+    public function action_html_template() {
+        $package_name = $this->request->param('package');
+        $packages = App::get_packages();
+        $packages = $packages['html'];
+
+        if (!array_key_exists($package_name, $packages)) {
+            $this->response->status(404);
+            return;
+        }
+
+        $package = $packages[$package_name];
+
+        $file = Kohana::find_file('app',
+            $package->kohana_file, $package->extension);
+
+        $html = file_get_contents($file);
+
+        // merge fields
+        if ($this->request->query('data'))
+            foreach ($this->request->query('data') as $id => $replace) {
+                $html = preg_replace('/\$\{'.$id.'\}/', $replace, $html);
+            }
+
+        echo $html;
+    }
+
     /** serve a static front-end file */
     public function action_file() {
         // find kohana file

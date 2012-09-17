@@ -4,7 +4,7 @@
         <meta charset="utf-8">
 
         <!-- info -->
-        <title><?= $app_info->name.' v'.$app_info->release_number.'.'.$app_info->build_number ?></title>
+        <title><?= $app_info->name.' v'.$app_info->release_number ?></title>
 
         <!-- kickass -->
         <meta name="apple-mobile-web-app-capable" content="yes">
