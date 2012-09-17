@@ -17,26 +17,28 @@ class App {
         }
 
         // build out the file list for JS
-        $sources = array();
-        foreach ($ret['js'] as $jsfile) {
-            $info = App::parse_file($jsfile);
+        foreach ($ret as $ext => $files) {
+            $sources = array();
+            foreach ($files as $file) {
+                $info = App::parse_file($file);
 
-            if(array_key_exists($info->package, $sources))
-                die("Package colision: $info->package");
+                if(array_key_exists($info->package, $sources))
+                    die("Package colision: $info->package");
 
-            $sources[$info->package] = (object)array(
-                'file' => '/app/'.$info->extension.'/'.$jsfile,
-                'requires' => $info->requires,
-                'added' => false,
-            );
+                $sources[$info->package] = (object)array(
+                    'file' => '/app/'.$info->extension.'/'.$file,
+                    'requires' => $info->requires,
+                    'added' => false,
+                );
+            }
+
+            // output
+            $output = array();
+            foreach ($sources as $source => $info)
+                App::add_source($source, $sources, $output);
+
+            $ret[$ext] = $output;
         }
-
-        // output
-        $output = array();
-        foreach ($sources as $source => $info)
-            App::add_source($source, $sources, $output);
-
-        $ret['js'] = $output;
 
         return $ret;
     }
@@ -50,8 +52,11 @@ class App {
         if ($source->added)
             return;
 
-        foreach ($source->requires as $req)
+        foreach ($source->requires as $req) {
+            if ($req == $source_key)
+                die ("circular dependency on $req");
             App::add_source($req, $sources, $output_list);
+        }
 
         $source->added = true;
         $output_list[] = $source->file;
@@ -72,15 +77,15 @@ class App {
             $matches = array();
             $str = fgets($file);
 
-            if (preg_match('/@require\s(.+)/', $str, $matches)) {
+            if (preg_match('/@require\s+([^\s]+)/', $str, $matches)) {
                 $requires[] = $matches[1];
             }
 
-            if (preg_match('/@package\s(.+)/', $str, $matches)) {
+            if (preg_match('/@package\s+([^\s]+)/', $str, $matches)) {
                 $package = $matches[1];
             }
 
-            if (preg_match('/@namespace\s(.+)/', $str, $matches)) {
+            if (preg_match('/@namespace\s+([^\s]+)/', $str, $matches)) {
                 $package = $matches[1].'.'.$file_n;
             }
         }
