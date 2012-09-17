@@ -16,21 +16,52 @@ class App {
             }
         }
 
+        // build out the file list for JS
+        $sources = array();
         foreach ($ret['js'] as $jsfile) {
             $info = App::parse_file($jsfile);
-            echo "\n$jsfile aka $info->package requires ";
-            foreach ($info->requires as $req)
-                echo "$req, ";
+
+            if(array_key_exists($info->package, $sources))
+                die("Package colision: $info->package");
+
+            $sources[$info->package] = (object)array(
+                'file' => '/app/'.$info->extension.'/'.$jsfile,
+                'requires' => $info->requires,
+                'added' => false,
+            );
         }
 
+        // output
+        $output = array();
+        foreach ($sources as $source => $info)
+            App::add_source($source, $sources, $output);
+
+        $ret['js'] = $output;
+
         return $ret;
+    }
+
+    /** create an array of sources files to be added in the correct order */
+    protected static function add_source($source_key, &$sources, &$output_list) {
+        if (!array_key_exists($source_key, $sources))
+            die("package not found: $source_key");
+        $source = $sources[$source_key];
+
+        if ($source->added)
+            return;
+
+        foreach ($source->requires as $req)
+            App::add_source($req, $sources, $output_list);
+
+        $source->added = true;
+        $output_list[] = $source->file;
     }
 
     /** parse the header for information */
     protected static function parse_file($file_name) {
         $ext    = pathinfo($file_name, PATHINFO_EXTENSION);
-        $file   = substr($file_name, 0, -(strlen($ext) + 1));
-        $file = Kohana::find_file('app', $file, $ext);
+        $file_n  = substr($file_name, 0, -(strlen($ext) + 1));
+        $file = Kohana::find_file('app', $file_n, $ext);
 
         $file = fopen($file, 'r');
 
@@ -39,19 +70,25 @@ class App {
         $package = $file_name;
         while (!feof($file)) {
             $matches = array();
+            $str = fgets($file);
 
-            if (preg_match('/@require\s(.+)/', fgets($file), $matches)) {
+            if (preg_match('/@require\s(.+)/', $str, $matches)) {
                 $requires[] = $matches[1];
             }
 
-            if (preg_match('/@package\s(.+)/', fgets($file), $matches)) {
+            if (preg_match('/@package\s(.+)/', $str, $matches)) {
                 $package = $matches[1];
+            }
+
+            if (preg_match('/@namespace\s(.+)/', $str, $matches)) {
+                $package = $matches[1].'.'.$file_n;
             }
         }
 
         return (object)array(
             'requires' => $requires,
             'package' => $package,
+            'extension' => $ext,
         );
 
     }
