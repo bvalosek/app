@@ -21,6 +21,18 @@ class Controller_App extends Controller {
         echo json_encode(App::get_packages());
     }
 
+    /** output list of files relative to doc root */
+    public function action_output_files($ext = 'js') {
+        $files = App::get_app_files();
+        $files = $files[$ext];
+        foreach ($files as $f) {
+            $f = preg_replace('!/app/[^/]+/!', '', $f);
+            $f = str_replace('.'.$ext, '', $f);
+            $f = Kohana::find_file('app', $f, $ext);
+            echo "$f\n";
+        }
+    }
+
     /** serve some templated HTML */
     public function action_html_template() {
         $package_name = $this->request->param('package');

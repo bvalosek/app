@@ -28,8 +28,11 @@ class App {
             foreach ($files as $file) {
                 $info = App::parse_file($file);
 
+                if ($info->release)
+                    $sources = array();
+
                 if(array_key_exists($info->package, $sources))
-                    die("Package colision: $info->package");
+                    die("Package collision: $info->package");
 
                 $sources[$info->package] = (object)array(
                     'file' => '/app/'.$info->extension.'/'.$file,
@@ -38,6 +41,9 @@ class App {
                     'extension' => $ext,
                     'kohana_file' => substr($file, 0, -(strlen($ext) + 1)),
                 );
+
+                if ($info->release)
+                    break;
             }
 
             $all_sources[$ext] = $sources;
@@ -86,6 +92,7 @@ class App {
         // look for info
         $requires = array();
         $package = $file_name;
+        $release = false;
         while (!feof($file)) {
             $matches = array();
             $str = fgets($file);
@@ -98,6 +105,11 @@ class App {
                 $package = $matches[1];
             }
 
+            if (preg_match('/@release\s+/', $str, $matches)) {
+                $release = true;
+                break;
+            }
+
             if (preg_match('/@namespace\s+([^\s]+)/', $str, $matches)) {
                 $package = $matches[1].'.'.$file_n;
             }
@@ -107,6 +119,7 @@ class App {
             'requires' => $requires,
             'package' => $package,
             'extension' => $ext,
+            'release' => $release,
         );
 
     }
